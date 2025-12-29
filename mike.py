@@ -15,12 +15,12 @@ def callback(indata, frames, time, status) :
         print('listening, press ctrl c to stop')
         try :
             while True :
-                time.sleep(.01)
+                time.sleep(.05)
         except KeyboardInterrupt :
             print('stopped')
     if not q.empty() :
         data = q.get() #oldest auido chunk
-        if recognizer.AcceptWaveform(data.tobytes()) : #when a WORD BOUNDERY is detected 
+        if recognizer.AcceptWaveform(data.tobytes()) : #a word is finished
             result = json.loads(recognizer.Result())
-            if 'yes' in result.split :
+            if 'yes'or 'lets'or 'go' or 'yeah' in result.split :
                 print('yes')
