@@ -23,12 +23,19 @@ clip_t = 5
 
 def Callback(indata, frames, time, status) : #sounddevice calls this funtion, not my code, dont worry about undefined varibles
     q.put(indata.copy()) #avioding corruption
+
 q =queue.Queue() #auido inbox, holds so the callback can inspect on own time
 model = Model('vosk_model') #trained speech knowladge 
 recognizer = KaldiRecognizer(model, 16000) #streaming decoder, using model knowladge expecting 16000 samples/s
-stream = sd.InputStream(samplerate=16000, channels=1, callback=Callback) #we dont call Callback, simply pass it to sounddevice
+stream = sd.InputStream(
+    channels=1,
+    samplerate=16000,
+    blocksize=800,
+    dtype='int16',
+    callback=Callback) #we dont call Callback, simply pass it to sounddevice
 stream.start() 
 print('listening for yes, lets go')
+
 def Save_clip(frames) : #expects tuples
     if len(frames) == 0 :
         return
@@ -63,7 +70,7 @@ while True :
     thresh = cv2.dilate(thresh, None, iterations = 2)
     contors, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) #contors closed loop aaroun white areas 
     if len(contors) == 0 :
-        cv2.imshow('camera', frame)
+        cv2.imshow('camera', crop)
         continue #efficientcy
     largest = max(contors, key =cv2.contourArea)
     (x, y, w, h) = cv2.boundingRect(largest) #both instantious: (x,y) is top left corner,(w,h) is dimesions of box 
@@ -76,11 +83,12 @@ while True :
         cy = int(M['m01'] / M['m00']) #dividing ny the area gives us center of movement
         cv2.circle(frame, (cx,cy), 8, (0, 0, 255), -1) #disk of radius 8 overidden with red
         if smooth_centroid is None : 
-            sx, sy = cx, cy
+            smooth_centroid = (cx, cy) 
         else : 
             sx = int(delta*smooth_centroid[0] + (1-delta)*cx)
             sy = int(delta*(smooth_centroid[1])+ (1-delta)*cy)
             smooth_centroid = (sx,sy)
+        sx,sy = smooth_centroid 
 
         if smooth_w is None :
             smooth_w, smooth_h = w,h
@@ -99,25 +107,22 @@ while True :
         crop = frame[y1:y2,x1:x2]
 
                     #MIC AND WORD RECOGNITION
-        while not q.empty() : #empties q each frame 
-            data = q.get() #oldest auido chunk
-            if recognizer.AcceptWaveform(data.tobytes()) : #a word is finished
-                result = json.loads(recognizer.Result())
-                text = result.get('text', '').lower()
-                if any(word in text for word in['yes', 'lets', 'go', 'yeah']) :
-                    triggered = True
-                    print('grarly shit bruh, saving clip!')
-        if crop.size > 0 :
-            cv2.imshow('camera', frame)
-            buffer.append((now, crop))
-        if crop.size == 0 :
-            continue
+    while not q.empty() : 
+        data = q.get()
+        recognizer.AcceptWaveform(data.tobytes())
+        partial = json.loads(recognizer.PartialResult())
+        text = partial.get("partial", partial).lower()
+        print('partial', {})
+        if any(word in text for word in ["yes", "go", "yeah", "let's"]):
+            triggered = True
+            print("TRIGGERED")
+            recognizer.Reset()
 
-        cutoff = now - clip_t
-        buffer = [(t,f) for t, f in buffer if t >= cutoff] #temporary memory updates every ideration
+    cutoff = now - clip_t
+    buffer = [(t,f) for t, f in buffer if t >= cutoff] #temporary memory updates every ideration
 
-        if triggered :
-            Save_clip(buffer)
+    if triggered :
+        Save_clip(buffer)
 
     if cv2.waitKey(1) & 0xFF == ord('q') : 
         break #exits loop when press q
