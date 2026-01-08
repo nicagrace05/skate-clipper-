@@ -14,6 +14,8 @@ so far it utilizes my macs camera and mic, detects and crops the frame for the l
 - all caps on a varible signifys its inteneded to not be changed. objects commonly upercase until specifcation. some library funtions imported from c++ like KaldiRecognizer, need exact capitilzation
 - in real time systems, sensors can push data in the background without the prosesses being in the main loop 
 - camera and mic have differnt clocks cause they accept diffent sample frequancies, we need one global time.time()
+- vosk recognition is best when a gap suggests an end to a sentace, in this case acceptwaveform(audio) retutrns True
+- break doesnt work inside funtions cuh, you can exit by returning
 
 
 
