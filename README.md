@@ -17,6 +17,7 @@ so far it utilizes my macs camera and mic, to listen for keywords and save a 7 s
 - vosk recognition is best when a gap suggests an end to a sentace, in this case acceptwaveform(audio) retutrns True
 - break doesnt work inside funtions cuh, you can exit by returning
 - to save a file we need all frame sizes to be equal 
+- use seperete windows to display raw and annotated frames, they can get sticky
 
 
 

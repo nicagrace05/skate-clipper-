@@ -141,7 +141,7 @@ while True :
     #     maxw = max(maxw, w)
     #     maxh = max(maxh, h)
     #     crop = frame[y1:y2,x1:x2]
-    cv2.imshow('camera', frame)
+    cv2.imshow('camera_raw', raw)
 
                     #MIC AND WORD RECOGNITION
     while not q.empty() :
