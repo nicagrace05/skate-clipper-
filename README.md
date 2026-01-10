@@ -1,6 +1,6 @@
     overview
 i would like this project to use my macbooks camera and microphone to track and save skatebording clips. 
-so far it utilizes my macs camera and mic, detects and crops the frame for the largest occuring motion, listens for my favorite celebration words. if the motion threshold is hit and words are recognized, a 5 second clip before the word detection is saved to a folder on my desktop. still buggy doe
+so far it utilizes my macs camera and mic, to listen for keywords and save a 7 second clip before that to the file 'clips' in the repo. eventually i want to crop each frame around the motion and maybe slow the fps, but im running into issues with defining a center of motion to crop around that is consistent enough to not through errors when cropping around.
  
     reminders/learing
 -   (venv) before terminal prompt means inside sandbox
@@ -16,6 +16,7 @@ so far it utilizes my macs camera and mic, detects and crops the frame for the l
 - camera and mic have differnt clocks cause they accept diffent sample frequancies, we need one global time.time()
 - vosk recognition is best when a gap suggests an end to a sentace, in this case acceptwaveform(audio) retutrns True
 - break doesnt work inside funtions cuh, you can exit by returning
+- to save a file we need all frame sizes to be equal 
 
 
 
